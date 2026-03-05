@@ -66,14 +66,15 @@ mat_data = [
     ['Teil', 'Menge', 'Preis (ca.)', 'Hinweis', 'OK'],
     ['Raspberry Pi Zero 2W', '1x', '18-22 EUR', 'Kompakter als 3A+', cb()],
     ['Micro-USB OTG Adapter', '1x', '~2-3 EUR', 'Fuer USB-A Stick am OTG-Port', cb()],
-    ['Taster (momentary)', '9x', '~1,80 EUR', 'Ein Taster pro OS', cb()],
+    ['Panel-Mount Drucktaster', '10x', '~5 EUR', 'Mit Loetanschluss, direkt ins Gehaeuse schraubbar (z.B. Reichelt T250A)', cb()],
     ['Power Button (beleuchtet)', '1x', '~1-2 EUR', 'Fuer sauberen Shutdown, oben', cb()],
     ['LED Gruen 5mm', '1x', '~0,10 EUR', 'Zentrale Status-LED', cb()],
     ['LED Gelb 5mm', '1x', '~0,10 EUR', 'Zentrale Status-LED', cb()],
     ['LED Rot 5mm', '1x', '~0,10 EUR', 'Zentrale Status-LED', cb()],
     ['Widerstand 330 Ohm', '3x', '~0,15 EUR', 'Je eine pro LED', cb()],
     ['Jumperkabel female-female', '30x', '~3 EUR', 'Fuer GPIO-Verbindungen', cb()],
-    ['Lochrasterplatine', '1x', '~2 EUR', 'Saubere Verkabelung', cb()],
+    ['Schrumpfschlauch Sortiment', '1x', '~3 EUR', 'Zum Isolieren aller Loetstellen', cb()],
+    ['Kabelverbinder/Luesterklemmen', '1x', '~2 EUR', 'Optional: fuer GND-Sammelleitung', cb()],
     ['SD-Karte 128 GB', '1x', '~10-15 EUR', 'Fuer OS + ISOs', cb()],
     ['Micro-USB Netzteil 5V/2,5A', '1x', '~8-12 EUR', 'Pi-Netzteil empfohlen', cb()],
     ['Gehaeuse', '1x', '-', 'Wird selbst 3D-gedruckt', cb()],
@@ -94,7 +95,9 @@ story.append(Paragraph(
 story.append(Paragraph(
     "Hinweis zum OTG-Port: Der Pi Zero 2W hat zwei Micro-USB Ports. "
     "Der linke (PWR) ist nur fuer Strom, der rechte (USB) ist der OTG-Port fuer den Stick. "
-    "Mit dem OTG-Adapter kann ein normaler USB-A Stick angeschlossen werden.",
+    "Mit dem OTG-Adapter kann ein normaler USB-A Stick angeschlossen werden. "
+    "Verkabelung: Alle Taster und LEDs werden direkt per Jumperkabel und Loetstellen mit den GPIO-Pins verbunden - "
+    "keine Lochrasterplatine noetig. GND-Pins koennen ueber eine gemeinsame Ader zusammengefuehrt werden.",
     body_style))
 
 # GPIO PINBELEGUNG
@@ -283,8 +286,8 @@ story.append(Paragraph(
 story.append(Spacer(1,4))
 schritte = [
     ("1. Vorbereitung", "Raspberry Pi OS Lite auf SD-Karte flashen wie oben beschrieben. SSH und WLAN im Imager konfigurieren."),
-    ("2. LEDs anschliessen", "Drei LEDs auf Lochrasterplatine. Jeweils: GPIO-Pin -> 330-Ohm-Widerstand -> LED Anode (+) -> LED Kathode (-) -> GND."),
-    ("3. Knoepfe anschliessen", "Jeden Taster zwischen GPIO-Pin und GND schalten. Kein externer Widerstand noetig - Pull-up wird per Software gesetzt."),
+    ("2. LEDs anschliessen", "Jumperkabel direkt an LED-Beinchen loeten: Anode (+, laengeres Bein) -> Draht -> 330-Ohm-Widerstand -> Draht -> GPIO-Pin. Kathode (-, kuerzeres Bein) -> Draht -> GND. Alle GND-Kabel koennen zusammen an einen gemeinsamen GND-Pin des Pi gefuehrt werden. Jede Loetstelle mit Schrumpfschlauch isolieren."),
+    ("3. Knoepfe anschliessen", "Panel-Mount Taster von innen durch die Gehaeusebohrung stecken, Mutter von aussen festziehen. Direkt an die beiden Loetanschluesse des Tasters loeten: ein Kabel an GPIO-Pin, eines an GND. Alle GND-Kabel aller Taster koennen auf einer gemeinsamen Ader zusammengefuehrt und dann mit einem einzigen Kabel an einen GND-Pin des Pi angeschlossen werden. Schrumpfschlauch ueber alle Loetstellen. Kein externer Widerstand noetig - Pull-up wird per Software gesetzt."),
     ("4. Verbindung testen", "Pi starten, per SSH verbinden, GPIO testen mit: python3 -c \"import RPi.GPIO as GPIO; print('GPIO OK')\" - gibt GPIO OK aus wenn erfolgreich."),
     ("5. TARGET pruefen", "USB-Stick via OTG-Adapter anschliessen und mit lsblk pruefen. flasher.py ermittelt das Zielgeraet automatisch via lsblk beim Flash-Vorgang."),
     ("6. Dateien uebertragen", "flasher.py und setup.sh per SCP auf den Pi uebertragen (siehe unten)."),
