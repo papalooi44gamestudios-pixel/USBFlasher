@@ -137,6 +137,7 @@ So wird verhindert dass die SD-Karte des Pi versehentlich als Ziel verwendet wir
 | USB-Stick wird nicht erkannt | Falscher Port (PWR statt OTG) | OTG-Port verwenden (rechter Micro-USB) |
 | Pi startet nicht sauber | Schlechtes Netzteil/Kabel | Offizielles Pi-Netzteil + hochwertiges Kabel |
 | Service startet in Loop | Kritischer Fehler im Skript | `sudo journalctl -u flasher.service -n 50` |
+| Andere Fehler | Kontaktieren um nach einer lösung zu suchen | papalooi44github.tux424@passinbox.com |
 
 ### Logs auswerten
 
