@@ -153,7 +153,7 @@ grep "FEHLER" /home/pi/logs/*.txt
 ```
 
 ---
-legal
+## legal
 
 Regional Compliance & Usage Restriction (Effective Jan 1, 2027)
 Important Notice: Due to regional legislation regarding mandatory OS-level age verification (e.g., California AB 1043 and Colorado SB 24-041), this software is not licensed for use within the states of California and Colorado, USA, starting January 1, 2027.
