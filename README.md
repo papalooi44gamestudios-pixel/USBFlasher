@@ -153,6 +153,22 @@ grep "FEHLER" /home/pi/logs/*.txt
 ```
 
 ---
+legal
+
+Regional Compliance & Usage Restriction (Effective Jan 1, 2027)
+Important Notice: Due to regional legislation regarding mandatory OS-level age verification (e.g., California AB 1043 and Colorado SB 24-041), this software is not licensed for use within the states of California and Colorado, USA, starting January 1, 2027.
+
+As an independent project, this OS does not implement the costly and complex age-signaling infrastructure required by these specific laws. To ensure legal compliance:
+
+The installation process will include a mandatory residency query.
+
+If a user confirms residency in CA or CO, the installation will be blocked.
+
+Any attempt to bypass this check is a violation of the Terms of Service.
+
+Disclaimer: This measure is taken to avoid civil penalties (up to $7,500 per violation) that are unsustainable for this project. If you are a resident of these states, please use a compliant alternative.
+
+---
 
 ## 📄 Lizenz
 
