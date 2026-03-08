@@ -3,6 +3,7 @@ import subprocess
 import os
 import time
 import threading
+import queue
 from datetime import datetime
 
 # Versuche RPLCD zu importieren, sonst Dummy fuer Tests
@@ -50,14 +51,7 @@ LCD_I2C_PORT      = 1       # /dev/i2c-1 auf Pi Zero 2W
 LCD_ZEILEN        = 4
 LCD_SPALTEN       = 20
 
-# GPIO-Pins der 4 LCD-Buttons (JOY-IT RB-LCD20X4)
-# Pins laut Datenblatt pruefen: https://cdn-reichelt.de/documents/datenblatt/A300/RB-LCD20X4-DATASHEET.pdf
-BTN_HOCH    = 21   # Button 1 - Menue hoch
-BTN_RUNTER  = 20   # Button 2 - Menue runter
-BTN_OK      = 16   # Button 3 - Auswaehlen / Bestaetigen
-BTN_ZURUECK = 12   # Button 4 - Zurueck / Abbrechen
-
-DEBOUNCE_ZEIT = 0.25  # Sekunden
+DEBOUNCE_ZEIT = 0.25  # Sekunden (fuer Numpad)
 
 # =============================================================
 # SETUP
@@ -68,8 +62,7 @@ os.makedirs(LOG_DIR, exist_ok=True)
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
-for btn in [BTN_HOCH, BTN_RUNTER, BTN_OK, BTN_ZURUECK]:
-    GPIO.setup(btn, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+# Keine GPIO-Buttons - Navigation ausschliesslich per USB-Numpad
 
 # Globale Flash-Sperre gegen Race Condition
 flash_laeuft = threading.Lock()
@@ -159,18 +152,16 @@ def zeige_status(zeile1="", zeile2="", zeile3="", zeile4=""):
     lcd_schreibe(3, zeile4)
 
 def zeige_bestaetigung(name):
-    # Fragt vor dem Flash nach Bestaetigung
-    # Zeigt OS-Name und OK/Abbrechen Optionen
     lcd_schreibe(0, "Bestaetigen?")
     lcd_schreibe(1, name[:LCD_SPALTEN])
-    lcd_schreibe(2, ">OK        Abbruch")
-    lcd_schreibe(3, "BTN3=OK  BTN4=Nein")
+    lcd_schreibe(2, "Enter=OK    *=Nein")
+    lcd_schreibe(3, "")
 
 # =============================================================
 # USB NUMPAD
 # =============================================================
 
-numpad_gerät = None
+numpad_geraet = None
 
 # Mapping Numpad-Tasten -> Aktionen
 # 1-9: direkter OS-Index (0-basiert: 1=Index 0, etc.)
@@ -215,20 +206,19 @@ def finde_numpad():
     return None
 
 # Eingabe-Queue fuer Numpad-Events (Thread-sicher)
-import queue
 eingabe_queue = queue.Queue()
 
 def numpad_thread():
     # Liest Numpad-Events im Hintergrund und legt sie in die Queue
-    global numpad_gerät
+    global numpad_geraet
     while True:
-        if numpad_gerät is None:
-            numpad_gerät = finde_numpad()
-            if numpad_gerät is None:
+        if numpad_geraet is None:
+            numpad_geraet = finde_numpad()
+            if numpad_geraet is None:
                 time.sleep(3)
                 continue
         try:
-            for event in numpad_gerät.read_loop():
+            for event in numpad_geraet.read_loop():
                 if event.type == ecodes.EV_KEY:
                     key_event = evdev.categorize(event)
                     if key_event.keystate == evdev.KeyEvent.key_down:
@@ -236,7 +226,7 @@ def numpad_thread():
                             eingabe_queue.put(("numpad", NUMPAD_MAPPING[event.code]))
         except Exception as e:
             log(f"Numpad getrennt oder Fehler: {e}", "WARNUNG")
-            numpad_gerät = None
+            numpad_geraet = None
             time.sleep(2)
 
 # =============================================================
@@ -306,8 +296,8 @@ def schutz_datei_vorhanden(device):
     try:
         r = subprocess.run(["mount", partition, tmp], capture_output=True, text=True)
         if r.returncode != 0:
-            log(f"Mount fehlgeschlagen - Schutzcheck uebersprungen", "WARNUNG")
-            return False
+            log(f"Mount fehlgeschlagen - Flash wird zur Sicherheit blockiert", "WARNUNG")
+            return True  # Im Zweifel blockieren
         found = os.path.isfile(os.path.join(tmp, "ensurance.MD"))
         subprocess.run(["sync"], capture_output=True)
         subprocess.run(["umount", tmp], capture_output=True)
@@ -338,6 +328,7 @@ def starte_flash(index):
         log("Flash laeuft bereits", "WARNUNG")
         zeige_status("Fehler:", "Flash laeuft", "bereits!", "")
         time.sleep(3)
+        zeige_menue()
         return
 
     try:
@@ -405,7 +396,7 @@ def starte_flash(index):
             else:
                 result = subprocess.run(
                     ["dd", f"if={iso_path}", f"of={target}",
-                     "bs=4M", "conv=fdatasync"],
+                     "bs=8M", "conv=fdatasync"],
                     capture_output=True, text=True
                 )
                 if result.returncode != 0:
@@ -462,19 +453,9 @@ def menue_ok():
         name = SYSTEMS[menue_index][0]
         zeige_bestaetigung(name)
 
-        # Warte auf BTN_OK oder BTN_ZURUECK
+        # Warte auf Numpad Enter oder Stern
         start = time.time()
         while time.time() - start < 30:
-            if GPIO.input(BTN_OK) == GPIO.LOW:
-                time.sleep(DEBOUNCE_ZEIT)
-                if GPIO.input(BTN_OK) == GPIO.LOW:
-                    starte_flash(menue_index)
-                    return
-            if GPIO.input(BTN_ZURUECK) == GPIO.LOW:
-                time.sleep(DEBOUNCE_ZEIT)
-                zeige_menue()
-                return
-            # Auch Numpad Enter/Stern pruefen
             try:
                 aktion, wert = eingabe_queue.get_nowait()
                 if aktion == "numpad":
@@ -523,18 +504,7 @@ def fahre_herunter():
 # =============================================================
 
 def verarbeite_eingabe(typ, wert):
-    if typ == "lcd":
-        if wert == "hoch":
-            menue_hoch()
-        elif wert == "runter":
-            menue_runter()
-        elif wert == "ok":
-            menue_ok()
-        elif wert == "zurueck":
-            # Im Hauptmenue: nichts tun oder Bestaetigung abbrechen
-            zeige_menue()
-
-    elif typ == "numpad":
+    if typ == "numpad":
         aktion, val = wert
         if aktion == "select":
             direktauswahl(val)
@@ -544,6 +514,8 @@ def verarbeite_eingabe(typ, wert):
             menue_runter()
         elif aktion == "ok":
             menue_ok()
+        elif aktion == "zurueck":
+            zeige_menue()
         elif aktion == "shutdown":
             fahre_herunter()
 
@@ -593,20 +565,8 @@ log("Bereit.")
 # HAUPTSCHLEIFE
 # =============================================================
 
-letzter_btn = {BTN_HOCH: 0, BTN_RUNTER: 0, BTN_OK: 0, BTN_ZURUECK: 0}
-BTN_AKTION  = {BTN_HOCH: "hoch", BTN_RUNTER: "runter", BTN_OK: "ok", BTN_ZURUECK: "zurueck"}
-
 try:
     while True:
-        jetzt = time.time()
-
-        # LCD-Buttons abfragen
-        for btn, aktion in BTN_AKTION.items():
-            if GPIO.input(btn) == GPIO.LOW:
-                if jetzt - letzter_btn[btn] > DEBOUNCE_ZEIT:
-                    letzter_btn[btn] = jetzt
-                    verarbeite_eingabe("lcd", aktion)
-
         # Numpad-Events aus Queue verarbeiten
         try:
             typ, wert = eingabe_queue.get_nowait()

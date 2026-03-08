@@ -26,8 +26,8 @@ declare -A ISO_URLS=(
     ["debian"]="https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-12.10.0-amd64-netinst.iso"
     ["fedora"]="https://download.fedoraproject.org/pub/fedora/linux/releases/41/Workstation/x86_64/iso/Fedora-Workstation-Live-x86_64-41-1.4.iso"
     ["arch"]="https://mirrors.kernel.org/archlinux/iso/latest/archlinux-x86_64.iso"
-    ["z18"]="https://downloads.zorin.com/ZorinOS-18-Core-64-bit.iso"
-    ["bazzite"]="https://dl.bazzite.gg/Bazzite-KDE-stable.iso"
+    ["z18"]="https://downloads.zorin.com/ZorinOS-18-Core-64-bit.iso"   # Bitte aktuellen Link auf zorin.com/os/download pruefen
+    ["bazzite"]="https://dl.bazzite.gg/Bazzite-KDE-stable.iso"   # Bitte aktuellen Link auf bazzite.gg pruefen
 )
 
 declare -A ISO_NAMES=(
@@ -43,15 +43,15 @@ declare -A ISO_NAMES=(
 )
 
 declare -A ISO_SIZES=(
-    ["u24"]="5"
-    ["mint"]="3"
-    ["debian"]="1"
-    ["fedora"]="2"
-    ["arch"]="1"
-    ["z18"]="4"
-    ["bazzite"]="4"
-    ["w10"]="6"
-    ["w11"]="7"
+    ["u24"]="6"
+    ["mint"]="4"
+    ["debian"]="2"
+    ["fedora"]="3"
+    ["arch"]="2"
+    ["z18"]="5"
+    ["bazzite"]="5"
+    ["w10"]="7"
+    ["w11"]="8"
 )
 
 # =============================================================
@@ -90,7 +90,7 @@ download_iso() {
     echo ""
 
     if [ "$tool" = "wget" ]; then
-        wget --progress=bar:force -O "$ziel" "$url"
+        wget --progress=bar:force -c -O "$ziel" "$url"
     else
         curl -L --progress-bar -o "$ziel" "$url"
     fi
