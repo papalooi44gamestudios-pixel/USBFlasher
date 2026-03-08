@@ -3,6 +3,7 @@ import subprocess
 import os
 import time
 import threading
+import queue
 from datetime import datetime
 
 # Versuche RPLCD zu importieren, sonst Dummy fuer Tests
@@ -170,7 +171,7 @@ def zeige_bestaetigung(name):
 # USB NUMPAD
 # =============================================================
 
-numpad_gerät = None
+numpad_geraet = None
 
 # Mapping Numpad-Tasten -> Aktionen
 # 1-9: direkter OS-Index (0-basiert: 1=Index 0, etc.)
@@ -215,20 +216,19 @@ def finde_numpad():
     return None
 
 # Eingabe-Queue fuer Numpad-Events (Thread-sicher)
-import queue
 eingabe_queue = queue.Queue()
 
 def numpad_thread():
     # Liest Numpad-Events im Hintergrund und legt sie in die Queue
-    global numpad_gerät
+    global numpad_geraet
     while True:
-        if numpad_gerät is None:
-            numpad_gerät = finde_numpad()
-            if numpad_gerät is None:
+        if numpad_geraet is None:
+            numpad_geraet = finde_numpad()
+            if numpad_geraet is None:
                 time.sleep(3)
                 continue
         try:
-            for event in numpad_gerät.read_loop():
+            for event in numpad_geraet.read_loop():
                 if event.type == ecodes.EV_KEY:
                     key_event = evdev.categorize(event)
                     if key_event.keystate == evdev.KeyEvent.key_down:
@@ -236,7 +236,7 @@ def numpad_thread():
                             eingabe_queue.put(("numpad", NUMPAD_MAPPING[event.code]))
         except Exception as e:
             log(f"Numpad getrennt oder Fehler: {e}", "WARNUNG")
-            numpad_gerät = None
+            numpad_geraet = None
             time.sleep(2)
 
 # =============================================================
@@ -338,6 +338,7 @@ def starte_flash(index):
         log("Flash laeuft bereits", "WARNUNG")
         zeige_status("Fehler:", "Flash laeuft", "bereits!", "")
         time.sleep(3)
+        zeige_menue()
         return
 
     try:

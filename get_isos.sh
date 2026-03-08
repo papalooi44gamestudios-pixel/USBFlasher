@@ -26,8 +26,8 @@ declare -A ISO_URLS=(
     ["debian"]="https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-12.10.0-amd64-netinst.iso"
     ["fedora"]="https://download.fedoraproject.org/pub/fedora/linux/releases/41/Workstation/x86_64/iso/Fedora-Workstation-Live-x86_64-41-1.4.iso"
     ["arch"]="https://mirrors.kernel.org/archlinux/iso/latest/archlinux-x86_64.iso"
-    ["z18"]="https://downloads.zorin.com/ZorinOS-18-Core-64-bit.iso"
-    ["bazzite"]="https://dl.bazzite.gg/Bazzite-KDE-stable.iso"
+    ["z18"]="https://downloads.zorin.com/ZorinOS-18-Core-64-bit.iso"   # Bitte aktuellen Link auf zorin.com/os/download pruefen
+    ["bazzite"]="https://dl.bazzite.gg/Bazzite-KDE-stable.iso"   # Bitte aktuellen Link auf bazzite.gg pruefen
 )
 
 declare -A ISO_NAMES=(
