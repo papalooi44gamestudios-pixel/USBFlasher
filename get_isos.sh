@@ -43,15 +43,15 @@ declare -A ISO_NAMES=(
 )
 
 declare -A ISO_SIZES=(
-    ["u24"]="5"
-    ["mint"]="3"
-    ["debian"]="1"
-    ["fedora"]="2"
-    ["arch"]="1"
-    ["z18"]="4"
-    ["bazzite"]="4"
-    ["w10"]="6"
-    ["w11"]="7"
+    ["u24"]="6"
+    ["mint"]="4"
+    ["debian"]="2"
+    ["fedora"]="3"
+    ["arch"]="2"
+    ["z18"]="5"
+    ["bazzite"]="5"
+    ["w10"]="7"
+    ["w11"]="8"
 )
 
 # =============================================================
@@ -90,7 +90,7 @@ download_iso() {
     echo ""
 
     if [ "$tool" = "wget" ]; then
-        wget --progress=bar:force -O "$ziel" "$url"
+        wget --progress=bar:force -c -O "$ziel" "$url"
     else
         curl -L --progress-bar -o "$ziel" "$url"
     fi

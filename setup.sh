@@ -38,7 +38,7 @@ echo -e "${GREEN}  OK: /home/pi/isos und /home/pi/logs${NC}"
 # =============================================================
 echo -e "${YELLOW}[2/6] Installiere System-Abhaengigkeiten...${NC}"
 
-apt-get update -qq
+apt-get update -qq || apt-get update -qq
 
 # Python Grundlagen
 apt-get install -y python3-pip python3-smbus i2c-tools -qq
@@ -141,8 +141,9 @@ SERVICE
 
 systemctl daemon-reload
 systemctl enable flasher.service
+systemctl start flasher.service
 
-echo -e "${GREEN}  OK: flasher.service aktiviert${NC}"
+echo -e "${GREEN}  OK: flasher.service aktiviert und gestartet${NC}"
 
 # =============================================================
 # ABSCHLUSS
