@@ -1,108 +1,71 @@
-# 🚀 PiZero Multi-OS USB Flasher
+# USB Flasher v2
 
-Verwandle einen **Raspberry Pi Zero 2W** in eine autarke Flash-Station.  
-Wähle per Knopfdruck aus bis zu 9 Betriebssystemen und flashe sie direkt auf einen USB-Stick – ohne PC, ohne Monitor, ohne Tastatur.
-
----
-
-## ✨ Features
-
-- **Stand-alone Betrieb** – 9 dedizierte Taster für verschiedene OS-Images + Power-Button
-- **Smart-Download** – Mitgeliefertes Script lädt aktuelle Linux-ISOs direkt auf den Pi
-- **Sicherheitsmechanismus** – `ensurance.MD` verhindert versehentliches Überschreiben der SD-Karte
-- **Visuelles Feedback** – 3 LEDs zeigen Status: Bereit (Grün), Arbeitet/Blinkt (Gelb), Fehler (Rot)
-- **Windows-Support** – Windows 10/11 via `woeusb` oder `woeusb-ng`
-- **Automatische Geräteerkennung** – Ziel-USB-Stick wird automatisch via `lsblk` erkannt
-- **Session-Logging** – Jeder Flash-Vorgang wird mit Zeitstempel protokolliert
+Raspberry Pi Zero 2W basierter USB-Flasher mit LCD-Menü und Numpad-Steuerung.
+Unterstützt 9 Betriebssysteme (Linux + Windows), unbegrenzt erweiterbar.
 
 ---
 
-## 🛠 Hardware
+## Hardware
 
-| Komponente | Details |
+| Komponente | Modell | Preis | Quelle |
+|---|---|---|---|
+| Raspberry Pi Zero 2W (mit Pins) | SC0510 | ~22 € | Berrybase |
+| LCD 20x4 + 4 Buttons | JOY-IT RB-LCD20X4 | 4,50 € | Reichelt (RPI LCD20X4 4BYL) |
+| USB Hub (powered) | beliebig | ~10 € | – |
+| USB Numpad | beliebig | ~8 € | – |
+| SD-Karte (min. 64 GB) | – | ~10 € | – |
+| Netzteil 5V/2,5A Micro-USB | – | ~8 € | – |
+| **Gesamt** | | **~63 €** | |
+
+---
+
+## Anschlüsse
+
+```
+Pi Zero 2W
+├── GPIO-Header (40 Pin)  →  JOY-IT LCD direkt aufgesteckt
+│   ├── Pin 2  (5V)       →  LCD VCC
+│   ├── Pin 3  (SDA)      →  LCD I2C Daten
+│   ├── Pin 5  (SCL)      →  LCD I2C Takt
+│   └── Pin 6  (GND)      →  LCD GND
+├── Micro-USB Power        →  5V Netzteil
+└── Micro-USB OTG          →  Powered USB Hub
+    ├── USB Numpad
+    └── USB Stick (zu flashen)
+```
+
+---
+
+## LCD-Buttons
+
+| Button | Funktion |
 |---|---|
-| Controller | Raspberry Pi Zero 2W |
-| Adapter | Micro-USB auf USB-A (OTG) |
-| Taster | 9x OS-Auswahl + 1x Power-Button (GPIO) |
-| LEDs | 3x 5mm (Grün, Gelb, Rot) + je 1x 330Ω Widerstand |
-| Speicher | SD-Karte 128 GB |
-| Stromversorgung | Micro-USB Netzteil 5V/2,5A |
+| BTN1 (GPIO 21) | Menü hoch |
+| BTN2 (GPIO 20) | Menü runter |
+| BTN3 (GPIO 16) | Auswählen / OK |
+| BTN4 (GPIO 12) | Zurück / Abbrechen |
 
-### GPIO-Belegung
-
-| Funktion | GPIO | Pin |
-|---|---|---|
-| LED Grün | GPIO 18 | Pin 12 |
-| LED Gelb | GPIO 23 | Pin 16 |
-| LED Rot | GPIO 24 | Pin 18 |
-| Power Button | GPIO 26 | Pin 37 |
-| Windows 10 | GPIO 2 | Pin 3 |
-| Windows 11 | GPIO 3 | Pin 5 |
-| Ubuntu | GPIO 4 | Pin 7 |
-| Linux Mint | GPIO 17 | Pin 11 |
-| Debian | GPIO 27 | Pin 13 |
-| Fedora | GPIO 22 | Pin 15 |
-| Arch Linux | GPIO 10 | Pin 19 |
-| Zorin OS 18 | GPIO 9 | Pin 21 |
-| Bazzite | GPIO 11 | Pin 23 |
+> Pins laut Datenblatt prüfen. Falls nötig in `flasher.py` anpassen:
+> `BTN_HOCH`, `BTN_RUNTER`, `BTN_OK`, `BTN_ZURUECK`
 
 ---
 
-## 🚀 Schnellstart
+## Numpad-Belegung
 
-### 1. Repository klonen und Setup ausführen
-
-```bash
-git clone https://github.com/DEIN-PROFIL/usb-flasher.git
-cd usb-flasher
-sudo bash setup.sh
-```
-
-Das Setup-Script erledigt automatisch:
-- Ordnerstruktur anlegen (`/home/pi/isos/`, `/home/pi/logs/`)
-- Abhängigkeiten installieren (`python3-rpi.gpio`, `woeusb`/`woeusb-ng`)
-- Schutzfunktion aktivieren (`/ensurance.MD`)
-- systemd-Service einrichten (Autostart beim Boot)
-
-### 2. ISOs laden
-
-Linux-ISOs automatisch herunterladen:
-
-```bash
-bash get_isos.sh
-```
-
-Windows-ISOs müssen manuell heruntergeladen und übertragen werden:
-
-```bash
-# Download unter: https://www.microsoft.com/de-de/software-download/windows10
-scp windows10.iso pi@flasher.local:/home/pi/isos/w10.iso
-
-# Download unter: https://www.microsoft.com/de-de/software-download/windows11
-scp windows11.iso pi@flasher.local:/home/pi/isos/w11.iso
-```
-
-### 3. Betrieb
-
-Nach dem Booten blinkt die grüne LED 3x → Gerät ist bereit.  
-USB-Stick einstecken, gewünschten OS-Knopf drücken, gelbe LED blinkt während des Flash-Vorgangs.  
-**Power-Button 3 Sekunden halten** für sauberen Shutdown.
+| Taste | Funktion |
+|---|---|
+| 1–9 | Direktauswahl OS (1=Windows 10, 2=Windows 11, ...) |
+| 0 | Herunterfahren |
+| + | Menü hoch |
+| - | Menü runter |
+| Enter | Bestätigen |
+| * | Zurück |
 
 ---
 
-## 📂 Projektstruktur
+## ISO-Dateinamen
 
-```
-usb-flasher/
-├── flasher.py            # Hauptskript – GPIO, LEDs, Flash-Logik
-├── setup.sh              # Einrichtung: Ordner, Abhängigkeiten, systemd
-├── get_isos.sh           # Menügeführtes ISO-Download-Tool
-└── USB_Flasher_Anleitung.pdf  # Vollständige Bauanleitung
-```
-
-### ISO-Dateinamen (müssen exakt stimmen)
-
-| System | Dateiname |
+| Betriebssystem | Dateiname |
 |---|---|
 | Windows 10 | `w10.iso` |
 | Windows 11 | `w11.iso` |
@@ -114,62 +77,97 @@ usb-flasher/
 | Zorin OS 18 | `z18.iso` |
 | Bazzite | `bazzite.iso` |
 
----
-
-## 🔒 Sicherheitsmechanismus
-
-Auf der SD-Karte des Pi liegt eine Datei `/ensurance.MD`.  
-Vor jedem Flash-Vorgang prüft das Skript ob diese Datei auf dem **Zielgerät** vorhanden ist.  
-Wird sie gefunden → Flash wird blockiert, rote LED leuchtet.  
-So wird verhindert dass die SD-Karte des Pi versehentlich als Ziel verwendet wird.
-
-> **Hinweis:** Zu flashende USB-Sticks dürfen diese Datei **nicht** enthalten.
+ISOs liegen in `/home/pi/isos/`
 
 ---
 
-## 🔧 Troubleshooting
-
-| Problem | Ursache | Lösung |
-|---|---|---|
-| Grüne LED blinkt nicht beim Start | Service nicht gestartet | `sudo systemctl status flasher.service` |
-| Rote LED nach Knopfdruck | ISO fehlt oder USB-Stick nicht erkannt | `cat $(ls -t /home/pi/logs/*.txt \| head -1)` |
-| Windows-Flash schlägt fehl | woeusb nicht installiert | `sudo apt install woeusb` |
-| USB-Stick wird nicht erkannt | Falscher Port (PWR statt OTG) | OTG-Port verwenden (rechter Micro-USB) |
-| Pi startet nicht sauber | Schlechtes Netzteil/Kabel | Offizielles Pi-Netzteil + hochwertiges Kabel |
-| Service startet in Loop | Kritischer Fehler im Skript | `sudo journalctl -u flasher.service -n 50` |
-| Andere Fehler | Kontaktieren um nach einer lösung zu suchen | papalooi44github.tux424@passinbox.com |
-
-### Logs auswerten
+## Installation
 
 ```bash
-# Neueste Log-Datei anzeigen
-cat /home/pi/logs/$(ls -t /home/pi/logs/ | head -1)
+# Repo klonen
+git clone https://github.com/dein-user/usb-flasher.git
+cd usb-flasher
 
-# Live mitlesen
-tail -f /home/pi/logs/$(ls -t /home/pi/logs/ | head -1)
+# Setup ausführen (als root)
+sudo bash setup.sh
+```
 
-# Alle Fehler suchen
-grep "FEHLER" /home/pi/logs/*.txt
+Setup erledigt automatisch:
+- I2C aktivieren
+- Python-Abhängigkeiten installieren (RPLCD, evdev, RPi.GPIO)
+- woeusb für Windows-ISOs installieren
+- systemd Service einrichten (Autostart)
+- ensurance.MD Schutzfunktion anlegen
+
+---
+
+## ISOs übertragen
+
+```bash
+# Mit get_isos.sh (Linux-ISOs automatisch)
+sudo bash /home/pi/get_isos.sh
+
+# Manuell per SCP
+scp u24.iso pi@flasher.local:/home/pi/isos/u24.iso
+```
+
+Windows-ISOs müssen manuell von microsoft.com heruntergeladen werden:
+- Windows 10: https://www.microsoft.com/de-de/software-download/windows10ISO
+- Windows 11: https://www.microsoft.com/de-de/software-download/windows11
+
+---
+
+## LCD-Adresse prüfen
+
+```bash
+i2cdetect -y 1
+```
+
+Standard: `0x27`. Falls abweichend, in `flasher.py` anpassen:
+```python
+LCD_I2C_ADRESSE = 0x27  # oder 0x3F
 ```
 
 ---
-## legal
 
-Regional Compliance & Usage Restriction (Effective Jan 1, 2027)
-Important Notice: Due to regional legislation regarding mandatory OS-level age verification (e.g., California AB 1043 and Colorado SB 24-041), this software is not licensed for use within the states of California and Colorado, USA, starting January 1, 2027.
+## Sicherheitsmechanismus
 
-As an independent project, this OS does not implement the costly and complex age-signaling infrastructure required by these specific laws. To ensure legal compliance:
-
-The installation process will include a mandatory residency query.
-
-If a user confirms residency in CA or CO, the installation will be blocked.
-
-Any attempt to bypass this check is a violation of the Terms of Service.
-
-Disclaimer: This measure is taken to avoid civil penalties (up to $7,500 per violation) that are unsustainable for this project. If you are a resident of these states, please use a compliant alternative.
+`/ensurance.MD` liegt auf der SD-Karte des Pi. Vor jedem Flash prüft der Flasher ob diese Datei auf dem **Zielgerät** vorhanden ist. Falls ja → Flash blockiert. Verhindert versehentliches Überschreiben der SD-Karte des Pi.
 
 ---
 
-## 📄 Lizenz
+## Troubleshooting
 
-MIT License – frei zum Nachbauen, Modifizieren und Teilen.
+| Problem | Lösung |
+|---|---|
+| LCD zeigt nichts | I2C-Adresse prüfen: `i2cdetect -y 1`, ggf. Kontrast-Poti am LCD drehen |
+| Buttons reagieren nicht | GPIO-Pins im Datenblatt prüfen, in `flasher.py` anpassen |
+| Numpad wird nicht erkannt | `python3 -c "import evdev; print(evdev.list_devices())"` |
+| Service startet nicht | `journalctl -u flasher.service -n 50` |
+| Flash schlägt fehl | Log prüfen: `ls -t /home/pi/logs/ \| head -1` |
+| woeusb fehlt | `sudo apt install woeusb` |
+
+---
+
+## Erweiterung
+
+Neues OS hinzufügen – in `flasher.py` einfach in die Liste eintragen:
+
+```python
+SYSTEMS = [
+    ...
+    ("Pop!_OS", "popos.iso", False),  # einfach anfügen
+]
+```
+
+Kein weiterer Umbau nötig. Das Menü scrollt automatisch.
+
+---
+
+## Legal
+
+This software is provided for educational and personal use.
+
+Regarding age-verification laws (Colorado SB 24-041, California AB 1043 and similar legislation): This project is a hobbyist open-source tool for flashing operating system installation media. It does not distribute operating systems or other digital products directly. Any compliance obligations regarding age-verification for digital products rest with the respective OS vendors (Microsoft, Canonical, etc.), not with this tool. Users are responsible for ensuring they obtain OS images through official, legal channels.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
