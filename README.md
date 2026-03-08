@@ -9,7 +9,7 @@ Unterstützt 9 Betriebssysteme (Linux + Windows), unbegrenzt erweiterbar.
 
 | Komponente | Modell | Preis | Quelle |
 |---|---|---|---|
-| Raspberry Pi Zero 2W (mit Pins) | SC0510 | ~22 € | Berrybase |
+| Raspberry Pi Zero 2WH | SC0510 | ~22 € | Berrybase – "WH" = mit vorgelötetem GPIO-Header (zwingend erforderlich!) |
 | LCD 20x4 + 4 Buttons | JOY-IT RB-LCD20X4 | 4,50 € | Reichelt (RPI LCD20X4 4BYL) |
 | USB Hub (powered) | beliebig | ~10 € | – |
 | USB Numpad | beliebig | ~8 € | – |
