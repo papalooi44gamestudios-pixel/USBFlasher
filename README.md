@@ -36,20 +36,6 @@ Pi Zero 2W
 
 ---
 
-## LCD-Buttons
-
-| Button | Funktion |
-|---|---|
-| BTN1 (GPIO 21) | Menü hoch |
-| BTN2 (GPIO 20) | Menü runter |
-| BTN3 (GPIO 16) | Auswählen / OK |
-| BTN4 (GPIO 12) | Zurück / Abbrechen |
-
-> Pins laut Datenblatt prüfen. Falls nötig in `flasher.py` anpassen:
-> `BTN_HOCH`, `BTN_RUNTER`, `BTN_OK`, `BTN_ZURUECK`
-
----
-
 ## Numpad-Belegung
 
 | Taste | Funktion |
@@ -141,7 +127,6 @@ LCD_I2C_ADRESSE = 0x27  # oder 0x3F
 | Problem | Lösung |
 |---|---|
 | LCD zeigt nichts | I2C-Adresse prüfen: `i2cdetect -y 1`, ggf. Kontrast-Poti am LCD drehen |
-| Buttons reagieren nicht | GPIO-Pins im Datenblatt prüfen, in `flasher.py` anpassen |
 | Numpad wird nicht erkannt | `python3 -c "import evdev; print(evdev.list_devices())"` |
 | Service startet nicht | `journalctl -u flasher.service -n 50` |
 | Flash schlägt fehl | Log prüfen: `ls -t /home/pi/logs/ \| head -1` |
