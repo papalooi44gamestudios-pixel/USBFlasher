@@ -118,7 +118,7 @@ LCD_I2C_ADRESSE = 0x27  # oder 0x3F
 
 ## Sicherheitsmechanismus
 
-`/ensurance.MD` liegt auf der SD-Karte des Pi. Vor jedem Flash prüft der Flasher ob diese Datei auf dem **Zielgerät** vorhanden ist. Falls ja → Flash blockiert. Verhindert versehentliches Überschreiben der SD-Karte des Pi.
+`/ensurance.MD` liegt auf der SD-Karte des Pi. Vor jedem Flash prüft der Flasher ob diese Datei auf dem **Zielgerät** vorhanden ist. Falls ja → Flash blockiert. Verhindert versehentliches Überschreiben der SD-Karte durch device fehlerkennung.
 
 ---
 
