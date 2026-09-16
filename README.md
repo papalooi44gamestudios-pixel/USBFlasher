@@ -153,6 +153,5 @@ Kein weiterer Umbau nötig. Das Menü scrollt automatisch.
 
 This software is provided for educational and personal use.
 
-Regarding age-verification laws (Colorado SB 24-041, California AB 1043 and similar legislation): This project is a hobbyist open-source tool for flashing operating system installation media. It does not distribute operating systems or other digital products directly. Any compliance obligations regarding age-verification for digital products rest with the respective OS vendors (Microsoft, Canonical, etc.), not with this tool. Users are responsible for ensuring they obtain OS images through official, legal channels.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
